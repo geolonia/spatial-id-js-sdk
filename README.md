@@ -1,4 +1,4 @@
-# 3D 空間 ID 共通ライブラリ
+# 【実験版】 3D 空間 ID 共通ライブラリ
 
 これは 3D 空間 ID の共通ライブラリの JavaScript 版のプロトタイプです。
 
@@ -19,6 +19,8 @@
 メソッドについては以下のリンク先をご参照ください。
 
 https://github.com/spatial-id/spatial-object-model-specification#readme
+
+デフォルトではグローバル空間（WGS84, EPSG:4326）のベースとした座標系を利用しますが、任意の座標系を使うこともできます。任意の座標系を利用する場合は、「グローバル座標系以外の使い方」を参照してください。
 
 ## インストール方法
 
@@ -49,6 +51,7 @@ Space( input, zoom? )
 座標及び高度または空間 ID を以下のフォーマットで指定することができます。
 
 * LngLatWithAltitude: 緯度経度及び高度を含むオブジェクト。（例: `{ lng: number, lat: number, alt?: number }`）
+* XYZ: 直交座標系（デカルト座標系）で座標を指定するオブジェクト。EPSG:4326 (WGS84 / GPS緯度経度) を使う場合、`x` が経度、 `y` 緯度、 `z` 高度（メートル）で指定します。(例: `{ x: number, y: number, z?: number }`)
 * ZFXYTile: ZFXY（3次元タイル番号）を示す文字列。（例: `/15/6/2844/17952`）
 * TileHash: ZFXY をハッシュ化した値。（例: `100213200122640`）
 
@@ -155,3 +158,67 @@ space.move({x: 1, y: 5, f: -1})
 ### `.vertices3d()`
 
 * 現在の空間オブジェクトの3Dバウンディングボックスを作る8点の座標を配列として返す。
+
+# グローバル座標系以外の使い方
+
+`CRS` を使って、カスタムな座標系を作ることができます。
+
+```
+import { CRS } from '@spatial-id/javascript-sdk'
+const crs = CRS.fromEPSG('6670') // EPSG:6670 は平面直角座標系2系
+const space = new crs.Space({ x: 1, y: 1, z: 1 }, 25)
+```
+
+以降、`space` は上記と同様な動作を利用できます。
+
+## EPSG以外の任意座標系の使い方（ローカル空間ID）
+
+下記の例は、基準点を持たない座標系となります。
+
+```
+import { CRS } from '@spatial-id/javascript-sdk'
+
+// 全体範囲を指定する（3軸を同一値を利用する）
+const crs = CRS.fromCustomExtents({ min: -10, max: 10, units: '' })
+// 全体範囲を指定する（それぞれの軸を利用する - [x, y, z] の順）
+const crs = CRS.fromCustomExtents({ min: [-10, -10, 0], max: [10, 10, 20] })
+
+// 指定のズームでのタイルサイズを指定する（3軸同一値を利用する）
+const crs = CRS.fromCustomTargetSize({ size: 1, atZoom: 25 })
+// 指定のズームでのタイルサイズを指定する（それぞれの軸を利用する）
+const crs = CRS.fromCustomTargetSize({ x: 1, y: 1, z: 1, atZoom: 25 })
+
+const space = new crs.Space({ x: 1, y: 1, z: 1 }, 25)
+```
+
+基準点を持たない座標系に基準点を設定できます。（デフォルトで EPSG:4326になります）
+
+```
+crs.setOrigin({longitude: number, latitude: number, altitude: number, angle: number}, epsg?: string)
+```
+
+## 座標系変換
+
+あるCRSから別のCRSのSpaceに変換することもできます
+
+```
+import { CRS } from '@spatial-id/javascript-sdk'
+const crs2K = CRS.fromEPSG('6670') // EPSG:6670 は平面直角座標系2系
+const space = new crs.Space({ x: 1, y: 1, z: 1 }, 25)
+
+const crsWGS = CRS.fromEPSG('4326')
+const wgsSpace = space.spaceInCRS(crsWGS)
+const wgsGeoJSON = space.geoJsonInCRS(crsWGS)
+```
+
+基準点を持たない座標系から基準点を設定し、変換行います。基準点が無い場合、エラーとなります。
+
+```
+import { CRS } from '@spatial-id/javascript-sdk'
+const crs = CRS.fromCustomTargetSize({ size: 1, atZoom: 25, unit: 'm' }) // Z25で1タイルが3軸とも1m
+const space = new crs.Space({ x: 0, y: 0, z: 0 }, 25)
+
+const crsWGS = CRS.fromEPSG('4326')
+const wgsSpace = space.spaceInCRS(crsWGS)
+const wgsGeoJSON = space.geoJsonInCRS(crsWGS)
+```
