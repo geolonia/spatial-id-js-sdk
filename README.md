@@ -162,6 +162,7 @@ space.move({x: 1, y: 5, f: -1})
 # グローバル座標系以外の使い方
 
 `CRS` を使って、カスタムな座標系を作ることができます。
+`CRS` を使う場合は、指定の EPSG CRS の単位によってx/y/zの単位が決まります。例えば、EPSG:6670の平面直角座標系2系の単位はメートルなので、x/y/zの値はすべてメートルとなります。単位が「度」の場合は、x/yが度として解釈し、z (f) はメートルと解釈します。
 
 ```
 import { CRS } from '@spatial-id/javascript-sdk'
@@ -175,18 +176,23 @@ const space = new crs.Space({ x: 1, y: 1, z: 1 }, 25)
 
 下記の例は、基準点を持たない座標系となります。
 
+座標系の作成に、下記の２方法あります。
+
+* `CRS.fromCustomTargetSize` を使うと、指定のズームレベルでの空間IDの大きさを指定して空間を作ります。
+* 一方、 `CRS.fromCustomTargetSize` は空間の全体の大きさを指定して空間を作ります。
+
 ```
 import { CRS } from '@spatial-id/javascript-sdk'
-
-// 全体範囲を指定する（3軸を同一値を利用する）
-const crs = CRS.fromCustomExtents({ min: -10, max: 10, units: '' })
-// 全体範囲を指定する（それぞれの軸を利用する - [x, y, z] の順）
-const crs = CRS.fromCustomExtents({ min: [-10, -10, 0], max: [10, 10, 20] })
 
 // 指定のズームでのタイルサイズを指定する（3軸同一値を利用する）
 const crs = CRS.fromCustomTargetSize({ size: 1, atZoom: 25 })
 // 指定のズームでのタイルサイズを指定する（それぞれの軸を利用する）
 const crs = CRS.fromCustomTargetSize({ x: 1, y: 1, z: 1, atZoom: 25 })
+
+// 全体範囲を指定する（3軸を同一値を利用する）
+const crs = CRS.fromCustomExtents({ min: -10, max: 10, units: '' })
+// 全体範囲を指定する（それぞれの軸を利用する - [x, y, z] の順）
+const crs = CRS.fromCustomExtents({ min: [-10, -10, 0], max: [10, 10, 20] })
 
 const space = new crs.Space({ x: 1, y: 1, z: 1 }, 25)
 ```
