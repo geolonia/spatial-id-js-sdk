@@ -1,5 +1,5 @@
 import { LngLatWithAltitude } from "./types";
-import { calculateZFXY, getBBox, getChildren, getFloor, getParent, isZFXYTile, parseZFXYString, ZFXYTile, zfxyWraparound, getSurrounding, getCenterLngLatAlt } from "./zfxy";
+import { calculateZFXY, getBBox, getChildren, getFloor, getParent, isZFXYTile, parseZFXYString, ZFXYTile, zfxyWraparound, getSurrounding, getCenterLngLatAlt, getVoxelHeight } from "./zfxy";
 import { generateTilehash, parseZFXYTilehash } from "./zfxy_tilehash";
 import turfBBox from '@turf/bbox';
 import turfBooleanIntersects from '@turf/boolean-intersects';
@@ -11,6 +11,8 @@ const DEFAULT_ZOOM = 25 as const;
 export class Space {
   center: LngLatWithAltitude
   alt: number
+  altMin: number
+  altMax: number
   zoom: number
 
   zfxy: ZFXYTile
@@ -231,7 +233,8 @@ export class Space {
   }
 
   private _regenerateAttributesFromZFXY() {
-    this.alt = getFloor(this.zfxy);
+    this.alt = this.altMin = getFloor(this.zfxy);
+    this.altMax = this.altMin + getVoxelHeight(this.zfxy.z);
     this.center = getCenterLngLatAlt(this.zfxy);
     this.zoom = this.zfxy.z;
     this.id = this.tilehash = generateTilehash(this.zfxy);

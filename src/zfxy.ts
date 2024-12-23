@@ -100,7 +100,11 @@ export function getBBox(tile: ZFXYTile): [LngLat, LngLat] {
 
 /** Returns the floor of the voxel, in meters */
 export function getFloor(tile: ZFXYTile): number {
-  return tile.f * (2**ZFXY_1M_ZOOM_BASE) / (2**tile.z)
+  return tile.f * getVoxelHeight(tile.z);
+}
+
+export function getVoxelHeight(zoom: number): number {
+  return (2**ZFXY_1M_ZOOM_BASE) / (2**zoom);
 }
 
 export interface CalculateZFXYInput {

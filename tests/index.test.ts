@@ -20,10 +20,18 @@ describe('Space', () => {
       "lng": -90,
     });
 
+    expect(space.altMin).toStrictEqual(0);
+    expect(space.altMax).toStrictEqual(16777216);
+
     expect(space.up(1).zfxy).toStrictEqual({z: 1, f: 1, x: 0, y: 0});
     expect(space.up(1).tilehash).toStrictEqual('5');
+    expect(space.up(1).altMin).toStrictEqual(16777216);
+    expect(space.up(1).altMax).toStrictEqual(33554432);
+
     expect(space.down(1).zfxy).toStrictEqual({z: 1, f: -1, x: 0, y: 0});
     expect(space.down(1).tilehash).toStrictEqual('-5');
+    expect(space.down(1).altMin).toStrictEqual(-16777216);
+    expect(space.down(1).altMax).toStrictEqual(0);
   });
 
   const zfxyToPolygonTruthTable: [string, number[][]][] = [
