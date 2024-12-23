@@ -19,6 +19,7 @@ export declare function getCenterLngLatAlt(tile: ZFXYTile): LngLatWithAltitude;
 export declare function getBBox(tile: ZFXYTile): [LngLat, LngLat];
 /** Returns the floor of the voxel, in meters */
 export declare function getFloor(tile: ZFXYTile): number;
+export declare function getVoxelHeight(zoom: number): number;
 export interface CalculateZFXYInput {
     lat: number;
     lng: number;

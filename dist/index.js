@@ -153,7 +153,10 @@
     }
     /** Returns the floor of the voxel, in meters */
     function getFloor(tile) {
-        return tile.f * (Math.pow(2, ZFXY_1M_ZOOM_BASE)) / (Math.pow(2, tile.z));
+        return tile.f * getVoxelHeight(tile.z);
+    }
+    function getVoxelHeight(zoom) {
+        return (Math.pow(2, ZFXY_1M_ZOOM_BASE)) / (Math.pow(2, zoom));
     }
     function calculateZFXY(input) {
         var meters = typeof input.alt !== 'undefined' ? input.alt : 0;
@@ -4754,7 +4757,8 @@
             return spaces;
         };
         Space.prototype._regenerateAttributesFromZFXY = function () {
-            this.alt = getFloor(this.zfxy);
+            this.alt = this.altMin = getFloor(this.zfxy);
+            this.altMax = this.altMin + getVoxelHeight(this.zfxy.z);
             this.center = getCenterLngLatAlt(this.zfxy);
             this.zoom = this.zfxy.z;
             this.id = this.tilehash = generateTilehash(this.zfxy);

@@ -4,6 +4,8 @@ import type { Geometry, Polygon } from "geojson";
 export declare class Space {
     center: LngLatWithAltitude;
     alt: number;
+    altMin: number;
+    altMax: number;
     zoom: number;
     zfxy: ZFXYTile;
     id: string;
